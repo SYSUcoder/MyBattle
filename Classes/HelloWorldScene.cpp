@@ -73,14 +73,14 @@ bool HelloWorld::init()
 	*/
 
 	schedule(schedule_selector(HelloWorld::EnemyMove), 2.0f); // 敌军行动
-	// schedule(schedule_selector(HelloWorld::BulletMove), 0.04f);
+															  // schedule(schedule_selector(HelloWorld::BulletMove), 0.04f);
 
-	/*
-	auto a = EnemyBase(30, Vec2(2, 1), true);
-	std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
-	*/
+															  /*
+															  auto a = EnemyBase(30, Vec2(2, 1), true);
+															  std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
+															  */
 
-	// 测试文本，用来判断当前点击的位置
+															  // 测试文本，用来判断当前点击的位置
 	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
 	label->setPosition(Vec2(50, visibleSize.height - 50));
 	label->setAnchorPoint(Vec2::ZERO);

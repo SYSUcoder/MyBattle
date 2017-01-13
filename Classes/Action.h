@@ -11,7 +11,7 @@ USING_NS_CC;
 class MyActionManager
 {
 public:
-	// å•ä¾‹
+	// µ¥Àı
 	static MyActionManager* getInstance()
 	{
 		static MyActionManager instance;
