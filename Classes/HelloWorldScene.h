@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 #include "BaseEntity.h"
+#include "Action.h"
+#include "Data.h"
 
 #include <vector>
 
@@ -19,19 +21,21 @@ public:
 	virtual void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
 	virtual void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
     
+    virtual bool onContactBegin(PhysicsContact& contact);
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
-	void EnemyMove(float dt); // µĞÈËĞĞ¶¯
-	void BulletMove(float dt); // ×Óµ¯ĞĞ¶¯
+	void EnemyMove(float dt); // æ•Œäººè¡ŒåŠ¨
+	void BulletMove(float dt); // å­å¼¹è¡ŒåŠ¨
 
 private:
-	vector<EnemyBase> EnemyVec; // µĞÈËµÄ¾«Áé¼¯ºÏ
-	vector<BulletBase> BulletVec; // ×Óµ¯µÄ¾«Áé¼¯ºÏ
-	Label* label; // ²âÊÔÎÄ±¾
+	MyActionManager* actionManager; // å¤„ç†ç›¸å…³è¡Œä¸ºçš„æŒ‡é’ˆ
+	vector<EnemyBase> EnemyVec; // æ•Œäººçš„ç²¾çµé›†åˆ
+	vector<BulletBase> BulletVec; // å­å¼¹çš„ç²¾çµé›†åˆ
+	Label* label; // æµ‹è¯•æ–‡æœ¬
 };
 
 #endif // __HELLOWORLD_SCENE_H__

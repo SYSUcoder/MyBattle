@@ -12,36 +12,36 @@ USING_NS_CC;
 #define BULLET_ONE_STEP 10
 
 /*
-// ÏòÁ¿×ø±ê
+// å‘é‡åæ ‡
 struct MyVec
 {
-int m_x;
-int m_y;
-MyVec(int x = 0, int y = 0)
-{
-m_x = x;
-m_y = y;
-}
+	int m_x;
+	int m_y;
+	MyVec(int x = 0, int y = 0)
+	{
+		m_x = x;
+		m_y = y;
+	}
 };
 
-// ´òÓ¡ÏòÁ¿×ø±ê
+// æ‰“å°å‘é‡åæ ‡
 void PrintMyVec(MyVec myVec)
 {
-std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
+	std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
 }
 */
 
 
 
 /*****************************************
-* µĞÈË¡¢×Óµ¯¡¢·ÀÓùËş»ùÀà
+* æ•Œäººã€å­å¼¹ã€é˜²å¾¡å¡”åŸºç±»
 *****************************************/
 
-// µĞÈË»ùÀà
+// æ•ŒäººåŸºç±»
 class EnemyBase
 {
 public:
-	// @para: ÉúÃüÖµ£¬ËÙ¶ÈÊ¸Á¿£¬ÒÆ¶¯×´Ì¬
+	// @para: ç”Ÿå‘½å€¼ï¼Œé€Ÿåº¦çŸ¢é‡ï¼Œç§»åŠ¨çŠ¶æ€
 	EnemyBase(int health = 100, Vec2 velocity = Vec2(0, 0), bool isMoving = false)
 	{
 		m_health = health;
@@ -67,25 +67,25 @@ public:
 	int GetOneStep() { return m_oneStep; }
 	void SetOneStep(int oneStep) { m_oneStep = oneStep; }
 
-	void Rotate(Vec2 destPos); // µĞÈËĞı×ªÖÁÃæÏòÄ¿µÄµØ
-	void MoveOneStep(Vec2 destPos); // µĞÈË³¯ÏòÄ¿µÄµØÒÆ¶¯Ò»²½
-	bool IsReach(Vec2 destPos); // ÅĞ¶ÏÊÇ·ñ´ïµ½Ä¿µÄµØ
+	void Rotate(Vec2 destPos); // æ•Œäººæ—‹è½¬è‡³é¢å‘ç›®çš„åœ°
+	bool MoveOneStep(Vec2 destPos); // æ•Œäººæœå‘ç›®çš„åœ°ç§»åŠ¨ä¸€æ­¥
+	bool IsReach(Vec2 destPos); // åˆ¤æ–­æ˜¯å¦è¾¾åˆ°ç›®çš„åœ°
 
 private:
-	int m_health; // ÑªÁ¿
-	Vec2 m_velocity; // ËÙ¶ÈÊ¸Á¿
-	bool m_isMoving; // ÊÇ·ñÔÚÒÆ¶¯
-	Node* m_sprite; // ¾«Áé
-	int m_oneStep; // ¾«ÁéÒ»²½×î´óËùÕ¼µÄÏñËØ
+	int m_health; // è¡€é‡
+	Vec2 m_velocity; // é€Ÿåº¦çŸ¢é‡
+	bool m_isMoving; // æ˜¯å¦åœ¨ç§»åŠ¨
+	Node* m_sprite; // ç²¾çµ
+	int m_oneStep; // ç²¾çµä¸€æ­¥æœ€å¤§æ‰€å çš„åƒç´ 
 };
 
 
 
-// ¹­¼ı¡¢µ¼µ¯µÈ¹¥»÷µÀ¾ßµÄ»ùÀà
+// å¼“ç®­ã€å¯¼å¼¹ç­‰æ”»å‡»é“å…·çš„åŸºç±»
 class BulletBase
 {
 public:
-	// @para: ÉËº¦Öµ£¬ËÙ¶ÈÊ¸Á¿
+	// @para: ä¼¤å®³å€¼ï¼Œé€Ÿåº¦çŸ¢é‡
 	BulletBase(Node* targetSpt = NULL, int damage = 1, Vec2 velocity = Vec2(0, 0))
 	{
 		m_targetSpt = targetSpt;
@@ -110,24 +110,24 @@ public:
 	int GetOneStep() { return m_oneStep; }
 	void SetOneStep(int oneStep) { m_oneStep = oneStep; }
 
-	void Rotate(Vec2 destPos); // ×Óµ¯Ğı×ªÖÁÃæÏòÄ¿µÄµØ
-	void MoveOneStep(); // ×Óµ¯ÉäÏòÄ¿±ê£¬ÓëEnemyBase²»Í¬µÄÊÇÒ»µ©È·¶¨Ä¿±êÔò²»»á¸Ä±ä
+	void Rotate(Vec2 destPos); // å­å¼¹æ—‹è½¬è‡³é¢å‘ç›®çš„åœ°
+	void MoveOneStep(); // å­å¼¹å°„å‘ç›®æ ‡ï¼Œä¸EnemyBaseä¸åŒçš„æ˜¯ä¸€æ—¦ç¡®å®šç›®æ ‡åˆ™ä¸ä¼šæ”¹å˜
 
 private:
-	int m_damage; // ¹¥»÷µÀ¾ßµÄÉËº¦Öµ
-	Vec2 m_velocity; // ËÙ¶ÈÊ¸Á¿
-	Node* m_sprite; // ×ÔÉí¾«ÁéµÄÖ¸Õë
-	Node* m_targetSpt; // ÉäÏòÄ¿±ê¾«ÁéµÄÖ¸Õë
-	int m_oneStep; // ¾«ÁéÒ»²½×î´óËùÕ¼µÄÏñËØ
+	int m_damage; // æ”»å‡»é“å…·çš„ä¼¤å®³å€¼
+	Vec2 m_velocity; // é€Ÿåº¦çŸ¢é‡
+	Node* m_sprite; // è‡ªèº«ç²¾çµçš„æŒ‡é’ˆ
+	Node* m_targetSpt; // å°„å‘ç›®æ ‡ç²¾çµçš„æŒ‡é’ˆ
+	int m_oneStep; // ç²¾çµä¸€æ­¥æœ€å¤§æ‰€å çš„åƒç´ 
 };
 
 
 
-// ·ÀÓùËş»ùÀà
+// é˜²å¾¡å¡”åŸºç±»
 class TowerBase
 {
 public:
-	// @para: ·ÀÓùËşÔì¼Û£¬Éä³Ì°ë¾¶
+	// @para: é˜²å¾¡å¡”é€ ä»·ï¼Œå°„ç¨‹åŠå¾„
 	TowerBase(int cost = 0, int range = 0)
 	{
 		m_cost = cost;
@@ -146,22 +146,22 @@ public:
 	void SetSprite(Node* sprite) { m_sprite = sprite; }
 
 private:
-	int m_cost; // ·ÀÓùËşÔì¼Û
-	int m_range; // Éä³Ì°ë¾¶
-	Node* m_sprite; // ¾«Áé
+	int m_cost; // é˜²å¾¡å¡”é€ ä»·
+	int m_range; // å°„ç¨‹åŠå¾„
+	Node* m_sprite; // ç²¾çµ
 };
 
 /*****************************************
-* »ùÀà½áÊø
+* åŸºç±»ç»“æŸ
 *****************************************/
 
 
 
 /*****************************************
-* µĞÈËÅÉÉúÀà
+* æ•Œäººæ´¾ç”Ÿç±»
 *****************************************/
 
-// ¿ø¼×±ø
+// ç›”ç”²å…µ
 class ArmourEnemy : public EnemyBase
 {
 public:
@@ -174,7 +174,7 @@ public:
 		pLayer->addChild(pEnemySpt, Z);
 		SetSprite(pEnemySpt);
 
-		// ÉèÖÃÒÆ¶¯ËÙ¶È
+		// è®¾ç½®ç§»åŠ¨é€Ÿåº¦
 		SetOneStep(5);
 	}
 	~ArmourEnemy() {}
@@ -183,16 +183,16 @@ public:
 
 
 /*****************************************
-* µĞÈËÅÉÉúÀà½áÊø
+* æ•Œäººæ´¾ç”Ÿç±»ç»“æŸ
 *****************************************/
 
 
 
 /*****************************************
-* ×Óµ¯ÅÉÉúÀà
+* å­å¼¹æ´¾ç”Ÿç±»
 *****************************************/
 
-// Ä§·¨×Óµ¯
+// é­”æ³•å­å¼¹
 class MagicBullet : public BulletBase
 {
 public:
@@ -204,15 +204,15 @@ public:
 		pBulletSpt->setAnchorPoint(Vec2(0.5, 0.5));
 		pLayer->addChild(pBulletSpt, Z);
 
-		// »ñÈ¡³õÊ¼·½Ïò
-		Vec2 vVector = targetSpt->getPosition() - vPos; // ¾«ÁéÖ¸ÏòÄ¿µÄµØµÄÏòÁ¿
-		auto rotateRadians = vVector.getAngle(); // »ñÈ¡ÏòÁ¿ÓëxÖáµÄ»¡¶È
-		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // ½«»¡¶È×ªÎª½Ç¶È
-		pBulletSpt->setRotation(rotateDegrees);
+		// è·å–åˆå§‹æ–¹å‘
+		Vec2 vVector = targetSpt->getPosition() - vPos; // ç²¾çµæŒ‡å‘ç›®çš„åœ°çš„å‘é‡
+		auto rotateRadians = vVector.getAngle(); // è·å–å‘é‡ä¸xè½´çš„å¼§åº¦
+		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // å°†å¼§åº¦è½¬ä¸ºè§’åº¦
+		pBulletSpt-> setRotation(rotateDegrees);
 
 		SetSprite(pBulletSpt);
 
-		// ÉèÖÃÒÆ¶¯ËÙ¶È
+		// è®¾ç½®ç§»åŠ¨é€Ÿåº¦
 		SetOneStep(10);
 	}
 	~MagicBullet() {}
@@ -220,16 +220,16 @@ public:
 };
 
 /*****************************************
-* ×Óµ¯ÅÉÉúÀà½áÊø
+* å­å¼¹æ´¾ç”Ÿç±»ç»“æŸ
 *****************************************/
 
 
 
 /*****************************************
-* ·ÀÓùËşÅÉÉúÀà
+* é˜²å¾¡å¡”æ´¾ç”Ÿç±»
 *****************************************/
 
-// Ä§·¨Ëş
+// é­”æ³•å¡”
 class MagicTower : public TowerBase
 {
 public:
@@ -248,7 +248,7 @@ public:
 
 
 /*****************************************
-* ·ÀÓùËşÅÉÉúÀà½áÊø
+* é˜²å¾¡å¡”æ´¾ç”Ÿç±»ç»“æŸ
 *****************************************/
 
 

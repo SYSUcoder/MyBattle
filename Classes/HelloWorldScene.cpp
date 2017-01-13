@@ -36,6 +36,8 @@ bool HelloWorld::init()
 		return false;
 	}
 
+	actionManager = MyActionManager::getInstance();
+
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -63,27 +65,22 @@ bool HelloWorld::init()
 	pMapSprite->setAnchorPoint(Vec2(0, 0));
 	this->addChild(pMapSprite);
 
-	auto pEnemy = ArmourEnemy(Point(50, 50), this);
-	EnemyVec.push_back(pEnemy);
-
-	pEnemy = ArmourEnemy(Point(100, 100), this);
-	EnemyVec.push_back(pEnemy);
-
 	auto pTower = MagicTower(Point(780, 420), this);
 
+	/*
 	auto pBullet = MagicBullet(pEnemy.GetSprite(), pTower.GetSprite()->getPosition(), this);
 	BulletVec.push_back(pBullet);
+	*/
 
+	schedule(schedule_selector(HelloWorld::EnemyMove), 2.0f); // æ•Œå†›è¡ŒåŠ¨
+	// schedule(schedule_selector(HelloWorld::BulletMove), 0.04f);
 
-	schedule(schedule_selector(HelloWorld::EnemyMove), 0.04f); // µĞ¾üĞĞ¶¯
-	schedule(schedule_selector(HelloWorld::BulletMove), 0.04f); // µĞ¾üĞĞ¶¯
-
-
+	/*
 	auto a = EnemyBase(30, Vec2(2, 1), true);
 	std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
+	*/
 
-
-	// ²âÊÔÎÄ±¾£¬ÓÃÀ´ÅĞ¶Ïµ±Ç°µã»÷µÄÎ»ÖÃ
+	// æµ‹è¯•æ–‡æœ¬ï¼Œç”¨æ¥åˆ¤æ–­å½“å‰ç‚¹å‡»çš„ä½ç½®
 	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
 	label->setPosition(Vec2(50, visibleSize.height - 50));
 	label->setAnchorPoint(Vec2::ZERO);
@@ -91,9 +88,9 @@ bool HelloWorld::init()
 	addChild(label, 1);
 
 
-	// ÉèÎª¿É´¥Ãş
+	// è®¾ä¸ºå¯è§¦æ‘¸
 	setTouchEnabled(true);
-	// ÉèÖÃÎªµ¥µã´¥Ãş
+	// è®¾ç½®ä¸ºå•ç‚¹è§¦æ‘¸
 	setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
 
 	return true;
@@ -109,18 +106,15 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 #endif
 }
 
-// µĞ¾üĞĞ¶¯
+// æ•Œå†›è¡ŒåŠ¨
 void HelloWorld::EnemyMove(float dt)
 {
-	auto it = EnemyVec.begin();
-	while (it != EnemyVec.end())
-	{
-		(*it).MoveOneStep(Vec2(400, 400));
-		it++;
-	}
+	auto pEnemy = actionManager->CreateEnemy(this);
+	EnemyVec.push_back(pEnemy);
+	actionManager->MoveToDestination(pEnemy, RIGHT_TOP_DESTINATION);
 }
 
-// ×Óµ¯ĞĞ¶¯
+// å­å¼¹è¡ŒåŠ¨
 void HelloWorld::BulletMove(float dt)
 {
 	auto it = BulletVec.begin();
@@ -131,7 +125,7 @@ void HelloWorld::BulletMove(float dt)
 	}
 }
 
-// ´¥Ãş»Øµ÷
+// è§¦æ‘¸å›è°ƒ
 bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 {
 	auto vCurPos = touch->getLocation();
@@ -152,8 +146,14 @@ void HelloWorld::onTouchEnded(Touch* touch, Event* event)
 	auto vCurPos = touch->getLocation();
 }
 
+// ç¢°æ’ç›‘å¬
+bool HelloWorld::onContactBegin(PhysicsContact& contact)
+{
+	return true;
+}
 
-// ½«Vec2±ä³É×Ö·û´®
+
+// å°†Vec2å˜æˆå­—ç¬¦ä¸²
 string VecToStr(Vec2 vVec)
 {
 	string str;

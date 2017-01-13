@@ -2,48 +2,51 @@
 
 USING_NS_CC;
 
-// Ğı×ª£¬Ê¹¾«ÁéÃæÏòÇ°½ø·½Ïò
+// æ—‹è½¬ï¼Œä½¿ç²¾çµé¢å‘å‰è¿›æ–¹å‘
 void EnemyBase::Rotate(Vec2 destPos)
 {
-	Vec2 vPos = m_sprite->getPosition(); // ¾«Áéµ±Ç°×ø±ê
-	Vec2 vVector = destPos - vPos; // ¾«ÁéÖ¸ÏòÄ¿µÄµØµÄÏòÁ¿
-	auto rotateRadians = vVector.getAngle(); // »ñÈ¡ÏòÁ¿ÓëxÖáµÄ»¡¶È
-	auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // ½«»¡¶È×ªÎª½Ç¶È
-	auto speed = 0.5 / M_PI; // Ğı×ªµÄËÙÂÊ
-	auto rotateDuration = fabs(rotateRadians * speed); // Íê³ÉĞı×ªµÄÊ±¼ä
+	Vec2 vPos = m_sprite->getPosition(); // ç²¾çµå½“å‰åæ ‡
+	Vec2 vVector = destPos - vPos; // ç²¾çµæŒ‡å‘ç›®çš„åœ°çš„å‘é‡
+	auto rotateRadians = vVector.getAngle(); // è·å–å‘é‡ä¸xè½´çš„å¼§åº¦
+	auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // å°†å¼§åº¦è½¬ä¸ºè§’åº¦
+	auto speed = 0.5 / M_PI; // æ—‹è½¬çš„é€Ÿç‡
+	auto rotateDuration = fabs(rotateRadians * speed); // å®Œæˆæ—‹è½¬çš„æ—¶é—´
 	m_sprite->runAction(Sequence::create(RotateTo::create(rotateDuration, rotateDegrees),
-		NULL)); // Ğı×ª¶¯»­
+		NULL)); // æ—‹è½¬åŠ¨ç”»
 }
 
-// Ç°½øÒ»²½£¬¾«ÁéÒÆ¶¯µÄº¯Êı
-void EnemyBase::MoveOneStep(Vec2 destPos)
+// å‰è¿›ä¸€æ­¥ï¼Œç²¾çµç§»åŠ¨çš„å‡½æ•°
+// return: trueä»£è¡¨åˆ°è¾¾ç»ˆç‚¹
+bool EnemyBase::MoveOneStep(Vec2 destPos)
 {
-	EnemyBase::Rotate(destPos); // ³¯ÏòÄ¿µÄµØ
+	EnemyBase::Rotate(destPos); // æœå‘ç›®çš„åœ°
 
-	Vec2 vPos = m_sprite->getPosition(); // ¾«Áéµ±Ç°×ø±ê
-	Vec2 vVector = destPos - vPos; // ¾«ÁéÖ¸ÏòÄ¿µÄµØµÄÏòÁ¿
-	auto rotateRadians = vVector.getAngle(); // »ñÈ¡ÏòÁ¿ÓëxÖáµÄ»¡¶È
-	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // ½«»¡¶È×ªÎª½Ç¶È£¨ÕâÀïÒÔyÖáÕı°ëÖáÎªÕı£©
-																   // std::cout << rotateDegrees << std::endl;
-	auto fDistance = vPos.distance(destPos); // »ñÈ¡¾«Áéµ±Ç°Ëù´¦Î»ÖÃÓëÖÕµãÖ®¼äµÄ¾àÀë
-											 // std::cout << fDistance << std::endl;
+	Vec2 vPos = m_sprite->getPosition(); // ç²¾çµå½“å‰åæ ‡
+	Vec2 vVector = destPos - vPos; // ç²¾çµæŒ‡å‘ç›®çš„åœ°çš„å‘é‡
+	auto rotateRadians = vVector.getAngle(); // è·å–å‘é‡ä¸xè½´çš„å¼§åº¦
+	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // å°†å¼§åº¦è½¬ä¸ºè§’åº¦ï¼ˆè¿™é‡Œä»¥yè½´æ­£åŠè½´ä¸ºæ­£ï¼‰
+	// std::cout << rotateDegrees << std::endl;
+	auto fDistance = vPos.distance(destPos); // è·å–ç²¾çµå½“å‰æ‰€å¤„ä½ç½®ä¸ç»ˆç‚¹ä¹‹é—´çš„è·ç¦»
+	// std::cout << fDistance << std::endl;
 
-	if (fDistance > m_oneStep) // µ±¾àÀë´óÓÚ×î´óÒ»²½µÄ¾àÀë
+	if (fDistance > m_oneStep) // å½“è·ç¦»å¤§äºæœ€å¤§ä¸€æ­¥çš„è·ç¦»
 	{
 		// std::cout << "rotateDegrees:" << rotateDegrees << std::endl;
 		// std::cout << "cos(rotateDegrees):" << cos(rotateDegrees) << ",sin(rotateDegrees):" << sin(rotateDegrees) << std::endl;
-		// cosºÍsinµÄ²ÎÊıÎª»¡¶È£¬¶ø²»ÊÇ½Ç¶È
-		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // ÏÂÒ»²½µÄÆ«ÒÆÖµ
-																						 // std::cout << vOffset.x << "," << vOffset.y << std::endl;
-		m_sprite->setPosition(vPos + vOffset); // ½«¾«ÁéÒÆµ½ÏÂÒ»²½µÄÎ»ÖÃ
+		// coså’Œsinçš„å‚æ•°ä¸ºå¼§åº¦ï¼Œè€Œä¸æ˜¯è§’åº¦
+		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // ä¸‹ä¸€æ­¥çš„åç§»å€¼
+		// std::cout << vOffset.x << "," << vOffset.y << std::endl;
+		m_sprite->setPosition(vPos + vOffset); // å°†ç²¾çµç§»åˆ°ä¸‹ä¸€æ­¥çš„ä½ç½®
+		return false;
 	}
 	else
 	{
-		m_sprite->setPosition(destPos); // Ğ¡ÓÚ×î´óÒ»²½ÔòÖ±½ÓÒÆµ½Ä¿µÄµØ
+		m_sprite->setPosition(destPos); // å°äºæœ€å¤§ä¸€æ­¥åˆ™ç›´æ¥ç§»åˆ°ç›®çš„åœ°
+		return true;
 	}
 }
 
-// ÅĞ¶ÏÊÇ·ñµ½´ïÄ¿µÄµØ
+// åˆ¤æ–­æ˜¯å¦åˆ°è¾¾ç›®çš„åœ°
 bool EnemyBase::IsReach(Vec2 destPos)
 {
 	Vec2 vPos = m_sprite->getPosition();
@@ -57,47 +60,47 @@ bool EnemyBase::IsReach(Vec2 destPos)
 
 
 /************************************************
-* ×Óµ¯º¯ÊıÊµÏÖ
+* å­å¼¹å‡½æ•°å®ç°
 ************************************************/
 
-// Ğı×ª£¬Ê¹¾«ÁéÃæÏòÇ°½ø·½Ïò
+// æ—‹è½¬ï¼Œä½¿ç²¾çµé¢å‘å‰è¿›æ–¹å‘
 void BulletBase::Rotate(Vec2 destPos)
 {
-	Vec2 vPos = m_sprite->getPosition(); // ¾«Áéµ±Ç°×ø±ê
-	Vec2 vVector = destPos - vPos; // ¾«ÁéÖ¸ÏòÄ¿µÄµØµÄÏòÁ¿
-	auto rotateRadians = vVector.getAngle(); // »ñÈ¡ÏòÁ¿ÓëxÖáµÄ»¡¶È
-	auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // ½«»¡¶È×ªÎª½Ç¶È
-	auto speed = 0.5 / M_PI; // Ğı×ªµÄËÙÂÊ
-	auto rotateDuration = fabs(rotateRadians * speed); // Íê³ÉĞı×ªµÄÊ±¼ä
+	Vec2 vPos = m_sprite->getPosition(); // ç²¾çµå½“å‰åæ ‡
+	Vec2 vVector = destPos - vPos; // ç²¾çµæŒ‡å‘ç›®çš„åœ°çš„å‘é‡
+	auto rotateRadians = vVector.getAngle(); // è·å–å‘é‡ä¸xè½´çš„å¼§åº¦
+	auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // å°†å¼§åº¦è½¬ä¸ºè§’åº¦
+	auto speed = 0.5 / M_PI; // æ—‹è½¬çš„é€Ÿç‡
+	auto rotateDuration = fabs(rotateRadians * speed); // å®Œæˆæ—‹è½¬çš„æ—¶é—´
 	m_sprite->runAction(Sequence::create(RotateTo::create(rotateDuration, rotateDegrees),
-		NULL)); // Ğı×ª¶¯»­
+		NULL)); // æ—‹è½¬åŠ¨ç”»
 }
 
-// Ç°½øÒ»²½£¬¾«ÁéÒÆ¶¯µÄº¯Êı
+// å‰è¿›ä¸€æ­¥ï¼Œç²¾çµç§»åŠ¨çš„å‡½æ•°
 void BulletBase::MoveOneStep()
 {
 	auto destPos = m_targetSpt->getPosition();
-	BulletBase::Rotate(destPos); // ³¯ÏòÄ¿µÄµØ
+	BulletBase::Rotate(destPos); // æœå‘ç›®çš„åœ°
 
-	Vec2 vPos = m_sprite->getPosition(); // ¾«Áéµ±Ç°×ø±ê
-	Vec2 vVector = destPos - vPos; // ¾«ÁéÖ¸ÏòÄ¿µÄµØµÄÏòÁ¿
-	auto rotateRadians = vVector.getAngle(); // »ñÈ¡ÏòÁ¿ÓëxÖáµÄ»¡¶È
-	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // ½«»¡¶È×ªÎª½Ç¶È£¨ÕâÀïÒÔyÖáÕı°ëÖáÎªÕı£©
-																   // std::cout << rotateDegrees << std::endl;
-	auto fDistance = vPos.distance(destPos); // »ñÈ¡¾«Áéµ±Ç°Ëù´¦Î»ÖÃÓëÖÕµãÖ®¼äµÄ¾àÀë
-											 // std::cout << fDistance << std::endl;
+	Vec2 vPos = m_sprite->getPosition(); // ç²¾çµå½“å‰åæ ‡
+	Vec2 vVector = destPos - vPos; // ç²¾çµæŒ‡å‘ç›®çš„åœ°çš„å‘é‡
+	auto rotateRadians = vVector.getAngle(); // è·å–å‘é‡ä¸xè½´çš„å¼§åº¦
+	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // å°†å¼§åº¦è½¬ä¸ºè§’åº¦ï¼ˆè¿™é‡Œä»¥yè½´æ­£åŠè½´ä¸ºæ­£ï¼‰
+	// std::cout << rotateDegrees << std::endl;
+	auto fDistance = vPos.distance(destPos); // è·å–ç²¾çµå½“å‰æ‰€å¤„ä½ç½®ä¸ç»ˆç‚¹ä¹‹é—´çš„è·ç¦»
+	// std::cout << fDistance << std::endl;
 
-	if (fDistance > m_oneStep) // µ±¾àÀë´óÓÚ×î´óÒ»²½µÄ¾àÀë
+	if (fDistance > m_oneStep) // å½“è·ç¦»å¤§äºæœ€å¤§ä¸€æ­¥çš„è·ç¦»
 	{
 		// std::cout << "rotateDegrees:" << rotateDegrees << std::endl;
 		// std::cout << "cos(rotateDegrees):" << cos(rotateDegrees) << ",sin(rotateDegrees):" << sin(rotateDegrees) << std::endl;
-		// cosºÍsinµÄ²ÎÊıÎª»¡¶È£¬¶ø²»ÊÇ½Ç¶È
-		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // ÏÂÒ»²½µÄÆ«ÒÆÖµ
-																						 // std::cout << vOffset.x << "," << vOffset.y << std::endl;
-		m_sprite->setPosition(vPos + vOffset); // ½«¾«ÁéÒÆµ½ÏÂÒ»²½µÄÎ»ÖÃ
+		// coså’Œsinçš„å‚æ•°ä¸ºå¼§åº¦ï¼Œè€Œä¸æ˜¯è§’åº¦
+		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // ä¸‹ä¸€æ­¥çš„åç§»å€¼
+		// std::cout << vOffset.x << "," << vOffset.y << std::endl;
+		m_sprite->setPosition(vPos + vOffset); // å°†ç²¾çµç§»åˆ°ä¸‹ä¸€æ­¥çš„ä½ç½®
 	}
 	else
 	{
-		m_sprite->setPosition(destPos); // Ğ¡ÓÚ×î´óÒ»²½ÔòÖ±½ÓÒÆµ½Ä¿µÄµØ
+		m_sprite->setPosition(destPos); // å°äºæœ€å¤§ä¸€æ­¥åˆ™ç›´æ¥ç§»åˆ°ç›®çš„åœ°
 	}
 }
