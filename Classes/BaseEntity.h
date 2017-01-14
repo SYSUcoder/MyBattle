@@ -5,6 +5,7 @@
 #include <cmath>
 #include "SimpleAudioEngine.h"
 #include "cocos2d.h"
+#include "Data.h"
 
 USING_NS_CC;
 
@@ -15,19 +16,19 @@ USING_NS_CC;
 // 向量坐标
 struct MyVec
 {
-int m_x;
-int m_y;
-MyVec(int x = 0, int y = 0)
-{
-m_x = x;
-m_y = y;
-}
+	int m_x;
+	int m_y;
+	MyVec(int x = 0, int y = 0)
+	{
+		m_x = x;
+		m_y = y;
+	}
 };
 
 // 打印向量坐标
 void PrintMyVec(MyVec myVec)
 {
-std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
+	std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
 }
 */
 
@@ -85,7 +86,7 @@ private:
 class BulletBase
 {
 public:
-	// @para: 伤害值，速度矢量
+	// @para: 目标精灵指针，伤害值，速度矢量
 	BulletBase(Node* targetSpt = NULL, int damage = 1, Vec2 velocity = Vec2(0, 0))
 	{
 		m_targetSpt = targetSpt;
@@ -105,6 +106,7 @@ public:
 	Node* GetSprite() { return m_sprite; }
 	void SetSprite(Node* sprite) { m_sprite = sprite; }
 
+	Node* GetTargetSpt() { return m_targetSpt; }
 	void SetTargetSpt(Node* targetSpt) { m_targetSpt = targetSpt; }
 
 	int GetOneStep() { return m_oneStep; }
@@ -133,6 +135,8 @@ public:
 		m_cost = cost;
 		m_range = range;
 		m_sprite = NULL;
+		m_targetSpt = NULL;
+		m_CDTime = 0.0;
 	}
 	~TowerBase() {}
 
@@ -145,10 +149,24 @@ public:
 	Node* GetSprite() { return m_sprite; }
 	void SetSprite(Node* sprite) { m_sprite = sprite; }
 
+	Node* GetTargetSpt() { return m_targetSpt; }
+	void SetTargetSpt(Node* targetSpt) { m_targetSpt = targetSpt; }
+
+	double GetCDTime() { return m_CDTime; }
+	void SetCDTime(double CDTime) { m_CDTime = CDTime; }
+
+	double GetMaxCDTime() { return m_MaxCDTime; }
+	void SetMaxCDTime(double MaxCDTime) { m_MaxCDTime = MaxCDTime; }
+
+	bool IsInRange(Node* pEnemySpt);
+
 private:
 	int m_cost; // 防御塔造价
 	int m_range; // 射程半径
 	Node* m_sprite; // 精灵
+	Node* m_targetSpt; // 射向目标精灵的指针
+	double m_CDTime; // 防御塔当前冷却时间
+	double m_MaxCDTime; // 防御塔总冷却时间
 };
 
 /*****************************************
@@ -208,7 +226,7 @@ public:
 		Vec2 vVector = targetSpt->getPosition() - vPos; // 精灵指向目的地的向量
 		auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
 		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // 将弧度转为角度
-		pBulletSpt->setRotation(rotateDegrees);
+		pBulletSpt-> setRotation(rotateDegrees);
 
 		SetSprite(pBulletSpt);
 
@@ -241,6 +259,9 @@ public:
 		pMagicTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
 		pLayer->addChild(pMagicTowerSpt, Z);
 		SetSprite(pMagicTowerSpt);
+
+		SetMaxCDTime(MAGIC_TOWER_CDTIME);
+		SetRange(300); // 设置射程
 	}
 	~MagicTower() {}
 

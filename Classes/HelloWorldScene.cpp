@@ -38,6 +38,8 @@ bool HelloWorld::init()
 
 	actionManager = MyActionManager::getInstance();
 
+
+	//*******************************************************************
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -55,32 +57,36 @@ bool HelloWorld::init()
 
 
 	auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
-
-	// position the label on the center of the screen
 	label->setPosition(Vec2(origin.x + visibleSize.width / 2,
 		origin.y + visibleSize.height - label->getContentSize().height));
+	//*******************************************************************
 
-	auto pMapSprite = Sprite::create("Background/background.jpg");
 
+	// 地图背景
+	auto pMapSprite = Sprite::create("Background/background.jpg");	
 	pMapSprite->setAnchorPoint(Vec2(0, 0));
 	this->addChild(pMapSprite);
 
+	// 防御塔
 	auto pTower = MagicTower(Point(780, 420), this);
+	TowerVec.push_back(pTower);
 
 	/*
 	auto pBullet = MagicBullet(pEnemy.GetSprite(), pTower.GetSprite()->getPosition(), this);
 	BulletVec.push_back(pBullet);
 	*/
 
+	// 调度器
 	schedule(schedule_selector(HelloWorld::EnemyMove), 2.0f); // 敌军行动
-															  // schedule(schedule_selector(HelloWorld::BulletMove), 0.04f);
+	schedule(schedule_selector(HelloWorld::BulletMove), 0.02f); // 子弹行动
+	schedule(schedule_selector(HelloWorld::TowerAttack), 0.04f); // 防御塔调度器
 
-															  /*
-															  auto a = EnemyBase(30, Vec2(2, 1), true);
-															  std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
-															  */
+	/*
+	auto a = EnemyBase(30, Vec2(2, 1), true);
+	std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
+	*/
 
-															  // 测试文本，用来判断当前点击的位置
+	// 测试文本，用来判断当前点击的位置
 	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
 	label->setPosition(Vec2(50, visibleSize.height - 50));
 	label->setAnchorPoint(Vec2::ZERO);
@@ -120,7 +126,57 @@ void HelloWorld::BulletMove(float dt)
 	auto it = BulletVec.begin();
 	while (it != BulletVec.end())
 	{
-		(*it).MoveOneStep();
+		it->MoveOneStep();
+		it++;
+	}
+}
+
+// 防御塔进攻
+void HelloWorld::TowerAttack(float dt)
+{
+	auto it = TowerVec.begin();
+	while (it != TowerVec.end()) // 遍历所有防御塔
+	{
+		double MaxCDTime = it->GetMaxCDTime();
+		double curCDTime = it->GetCDTime();
+		if (curCDTime <= 0.000001) // 处于可发射状态
+		{
+			auto pTargetSpt = it->GetTargetSpt();
+			bool IsExistEnemy = false;
+			if (pTargetSpt != NULL && it->IsInRange(pTargetSpt) ) // 目标精灵存在且在射程范围内
+			{
+				auto pBullet = MagicBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
+				BulletVec.push_back(pBullet);
+				IsExistEnemy = true;
+			}
+			else
+			{
+				auto pEnemyIt = EnemyVec.begin();
+				while (pEnemyIt != EnemyVec.end()) // 遍历所有敌人
+				{
+					auto pEnemySpt = pEnemyIt->GetSprite();
+					if (it->IsInRange(pEnemySpt)) // 找到第一个在射程范围之内的目标
+					{
+						auto pBullet = MagicBullet(pEnemySpt, it->GetSprite()->getPosition(), this);
+						BulletVec.push_back(pBullet);
+						it->SetTargetSpt(pEnemySpt);
+						IsExistEnemy = true;
+						break;
+					}
+					pEnemyIt++;
+				}
+			}
+			if (IsExistEnemy)
+				it->SetCDTime(curCDTime + dt);
+		}
+		else if (curCDTime >= MaxCDTime) // 恢复可发射状态
+		{
+			curCDTime = 0.0;
+		}
+		else
+		{
+			it->SetCDTime(curCDTime + dt);
+		}
 		it++;
 	}
 }
