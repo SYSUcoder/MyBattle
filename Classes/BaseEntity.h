@@ -71,6 +71,7 @@ public:
 	void Rotate(Vec2 destPos); // 敌人旋转至面向目的地
 	bool MoveOneStep(Vec2 destPos); // 敌人朝向目的地移动一步
 	bool IsReach(Vec2 destPos); // 判断是否达到目的地
+	void SetSptBitmask(Node* pEnemySpt); // 给刚体设置掩码
 
 private:
 	int m_health; // 血量
@@ -115,11 +116,14 @@ public:
 	void Rotate(Vec2 destPos); // 子弹旋转至面向目的地
 	void MoveOneStep(); // 子弹射向目标，与EnemyBase不同的是一旦确定目标则不会改变
 
+	void SetSptBitmask(Node* pEnemySpt); // 给刚体设置掩码
+
 private:
 	int m_damage; // 攻击道具的伤害值
 	Vec2 m_velocity; // 速度矢量
 	Node* m_sprite; // 自身精灵的指针
 	Node* m_targetSpt; // 射向目标精灵的指针
+	Vec2 m_lastPos; // 上一次射向目标精灵的位置
 	int m_oneStep; // 精灵一步最大所占的像素
 };
 
@@ -189,8 +193,17 @@ public:
 		auto pEnemySpt = Sprite::create("Enemy/ArmourEnemy.png");
 		pEnemySpt->setPosition(vPos);
 		pEnemySpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pEnemySpt->setTag(ARMOUR_TAG);
 		pLayer->addChild(pEnemySpt, Z);
 		SetSprite(pEnemySpt);
+
+		// 添加刚体
+		auto pEnemyBody = PhysicsBody::createBox(Size(pEnemySpt->getContentSize().width, pEnemySpt->getContentSize().height));
+		pEnemyBody->setDynamic(false);
+		pEnemySpt->setPhysicsBody(pEnemyBody);
+
+		// 设置掩码
+		SetSptBitmask(pEnemySpt);
 
 		// 设置移动速度
 		SetOneStep(5);
@@ -220,7 +233,16 @@ public:
 		auto pBulletSpt = Sprite::create("Bullet/MagicBullet.png");
 		pBulletSpt->setPosition(vPos);
 		pBulletSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pBulletSpt->setTag(MAGICBULLET_TAG);
 		pLayer->addChild(pBulletSpt, Z);
+
+		// 添加刚体
+		auto pBulletBody = PhysicsBody::createBox(Size(pBulletSpt->getContentSize().width, pBulletSpt->getContentSize().height));
+		pBulletBody->setDynamic(false);
+		pBulletSpt->setPhysicsBody(pBulletBody);
+
+		// 设置掩码
+		SetSptBitmask(pBulletSpt);
 
 		// 获取初始方向
 		Vec2 vVector = targetSpt->getPosition() - vPos; // 精灵指向目的地的向量

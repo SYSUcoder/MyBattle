@@ -61,6 +61,20 @@ bool EnemyBase::IsReach(Vec2 destPos)
 		return false;
 }
 
+// 敌人刚体设置掩码
+void EnemyBase::SetSptBitmask(Node* pEnemySpt)
+{
+	auto tag = pEnemySpt->getTag();
+	if (tag == ARMOUR_TAG) // 盔甲兵的掩码
+	{
+		pEnemySpt->getPhysicsBody()->setCategoryBitmask(0x01);
+		pEnemySpt->getPhysicsBody()->setContactTestBitmask(0x02);
+	}
+	else
+	{
+		std::cout << "set mitmask error\n";
+	}
+}
 
 
 /************************************************
@@ -83,7 +97,14 @@ void BulletBase::Rotate(Vec2 destPos)
 // 前进一步，精灵移动的函数
 void BulletBase::MoveOneStep()
 {
-	auto destPos = m_targetSpt->getPosition();
+	Vec2 destPos;
+	if (m_targetSpt != NULL)
+	{
+		destPos = m_targetSpt->getPosition();
+		m_lastPos = destPos;
+	}
+	else
+		destPos = m_lastPos;
 	BulletBase::Rotate(destPos); // 朝向目的地
 
 	Vec2 vPos = m_sprite->getPosition(); // 精灵当前坐标
@@ -106,6 +127,21 @@ void BulletBase::MoveOneStep()
 	else
 	{
 		m_sprite->setPosition(destPos); // 小于最大一步则直接移到目的地
+	}
+}
+
+// 敌人刚体设置掩码
+void BulletBase::SetSptBitmask(Node* pBulletSpt)
+{
+	auto tag = pBulletSpt->getTag();
+	if (tag == MAGICBULLET_TAG) // 魔法子弹的掩码
+	{
+		pBulletSpt->getPhysicsBody()->setCategoryBitmask(0x02);
+		pBulletSpt->getPhysicsBody()->setContactTestBitmask(0x01);
+	}
+	else
+	{
+		std::cout << "set mitmask error\n";
 	}
 }
 

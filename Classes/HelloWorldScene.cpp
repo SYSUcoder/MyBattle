@@ -17,6 +17,9 @@ Scene* HelloWorld::createScene()
 	// 'scene' is an autorelease object
 	auto scene = Scene::createWithPhysics();
 
+	// 调试用，显示红框
+	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+
 	// 'layer' is an autorelease object
 	auto layer = HelloWorld::create();
 
@@ -93,6 +96,10 @@ bool HelloWorld::init()
 	label->setString("hello");
 	addChild(label, 1);
 
+	// 碰撞监听
+	auto listener = EventListenerPhysicsContact::create();
+	listener->onContactBegin = CC_CALLBACK_1(HelloWorld::onContactBegin, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
 
 	// 设为可触摸
 	setTouchEnabled(true);
@@ -171,7 +178,7 @@ void HelloWorld::TowerAttack(float dt)
 		}
 		else if (curCDTime >= MaxCDTime) // 恢复可发射状态
 		{
-			curCDTime = 0.0;
+			it->SetCDTime(0.0);
 		}
 		else
 		{
@@ -205,6 +212,48 @@ void HelloWorld::onTouchEnded(Touch* touch, Event* event)
 // 碰撞监听
 bool HelloWorld::onContactBegin(PhysicsContact& contact)
 {
+	auto nodeA = contact.getShapeA()->getBody()->getNode();
+	auto nodeB = contact.getShapeB()->getBody()->getNode();
+
+	if (nodeA && nodeB)
+	{
+		auto pTowerIt = TowerVec.begin();
+		while (pTowerIt != TowerVec.end()) // 清除防御塔的目标精灵
+		{
+			auto targetSpt = pTowerIt->GetTargetSpt();
+			if (targetSpt == nodeA || targetSpt == nodeB)
+			{
+				pTowerIt->SetTargetSpt(NULL);
+			}
+			pTowerIt++;
+		}
+		auto pBulletIt = BulletVec.begin();
+		while (pBulletIt != BulletVec.end()) // 清除子弹的目标精灵
+		{
+			auto targetSpt = pBulletIt->GetSprite();
+			if (targetSpt == nodeA || targetSpt == nodeB)
+			{
+				pBulletIt->SetTargetSpt(NULL);
+				pBulletIt = BulletVec.erase(pBulletIt);
+			}
+			else
+				pBulletIt++;
+		}
+		auto pEnemyIt = EnemyVec.begin();
+		while (pEnemyIt != EnemyVec.end()) // 清除敌人的目标精灵
+		{
+			auto targetSpt = pEnemyIt->GetSprite();
+			if (targetSpt == nodeA || targetSpt == nodeB)
+			{
+				pEnemyIt = EnemyVec.erase(pEnemyIt);
+			}
+			else
+				pEnemyIt++;
+		}
+		nodeA->removeFromParentAndCleanup(true);
+		nodeB->removeFromParentAndCleanup(true);
+	}
+
 	return true;
 }
 
