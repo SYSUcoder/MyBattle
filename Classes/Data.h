@@ -9,12 +9,24 @@ using std::vector;
 
 USING_NS_CC;
 
-#define RIGHT_TOP_DESTINATION ( Vec2(1300, 520) ) // å³ä¸Šç»ˆç‚¹åæ ‡
-#define VELOCITY_RATE 0.03 // é€Ÿåº¦å€çŽ‡
-#define MAGIC_TOWER_CDTIME 1.0 // é­”æ³•å¡”å†·å´æ—¶é—´
+#define RIGHT_TOP_DESTINATION ( Vec2(1300, 520) ) // ÓÒÉÏÖÕµã×ø±ê
+#define VELOCITY_RATE 0.03 // ËÙ¶È±¶ÂÊ
 
-#define ARMOUR_TAG 1 // ç›”ç”²å…µçš„æ ‡ç­¾
-#define MAGICBULLET_TAG 11 // é­”æ³•å­å¼¹çš„æ ‡ç­¾
+#define MAGIC_TOWER_CDTIME 1.0 // Ä§·¨ËþÀäÈ´Ê±¼ä
+#define ARROW_TOWER_CDTIME 0.7 // ¼ýËþÀäÈ´Ê±¼ä
+#define CANNON_TOWER_CDTIME 1.8 // ¼ÓÅ©ÅÚËþÀäÈ´Ê±¼ä
+
+#define ARMOUR_TAG 1 // ¿ø¼×±øµÄ±êÇ©
+#define MAGICBULLET_TAG 11 // Ä§·¨×Óµ¯µÄ±êÇ©
+
+#define BASEMENT_RANGE 20 // ·ÀÓùËþ»ùµØµã»÷·¶Î§µÄ°ë¾¶
+#define ARROW_ICON_RANGE 50 // ·ÀÓùËþ»ùµØÃªµãµ½¹­¼ýÍ¼±êÃªµãµÄ¾àÀë
+#define ICON_RANGE 15 // Í¼±ê°ë¾¶
+
+#define NONE_ICON_TAG 100 // Ã»ÓÐµã»÷Í¼±ê±êÇ©
+#define ARROW_ICON_TAG 101 // ¹­¼ýËþÍ¼±ê±êÇ©
+#define CANNON_ICON_TAG 102 // ¼ÓÅ©ÅÚËþÍ¼±ê±êÇ©
+#define MAGIC_ICON_TAG 103 // Ä§·¨ËþÍ¼±ê±êÇ©
 
 
 #endif

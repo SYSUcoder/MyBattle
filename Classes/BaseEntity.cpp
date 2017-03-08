@@ -29,9 +29,9 @@ bool EnemyBase::MoveOneStep(Vec2 destPos)
 	Vec2 vVector = destPos - vPos; // 精灵指向目的地的向量
 	auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
 	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // 将弧度转为角度（这里以y轴正半轴为正）
-	// std::cout << rotateDegrees << std::endl;
+																   // std::cout << rotateDegrees << std::endl;
 	auto fDistance = vPos.distance(destPos); // 获取精灵当前所处位置与终点之间的距离
-	// std::cout << fDistance << std::endl;
+											 // std::cout << fDistance << std::endl;
 
 	if (fDistance > m_oneStep) // 当距离大于最大一步的距离
 	{
@@ -39,7 +39,7 @@ bool EnemyBase::MoveOneStep(Vec2 destPos)
 		// std::cout << "cos(rotateDegrees):" << cos(rotateDegrees) << ",sin(rotateDegrees):" << sin(rotateDegrees) << std::endl;
 		// cos和sin的参数为弧度，而不是角度
 		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // 下一步的偏移值
-		// std::cout << vOffset.x << "," << vOffset.y << std::endl;
+																						 // std::cout << vOffset.x << "," << vOffset.y << std::endl;
 		m_sprite->setPosition(vPos + vOffset); // 将精灵移到下一步的位置
 		return false;
 	}
@@ -111,9 +111,9 @@ void BulletBase::MoveOneStep()
 	Vec2 vVector = destPos - vPos; // 精灵指向目的地的向量
 	auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
 	auto rotateDegrees = CC_RADIANS_TO_DEGREES(1 * rotateRadians); // 将弧度转为角度（这里以y轴正半轴为正）
-	// std::cout << rotateDegrees << std::endl;
+																   // std::cout << rotateDegrees << std::endl;
 	auto fDistance = vPos.distance(destPos); // 获取精灵当前所处位置与终点之间的距离
-	// std::cout << fDistance << std::endl;
+											 // std::cout << fDistance << std::endl;
 
 	if (fDistance > m_oneStep) // 当距离大于最大一步的距离
 	{
@@ -121,7 +121,7 @@ void BulletBase::MoveOneStep()
 		// std::cout << "cos(rotateDegrees):" << cos(rotateDegrees) << ",sin(rotateDegrees):" << sin(rotateDegrees) << std::endl;
 		// cos和sin的参数为弧度，而不是角度
 		Vec2 vOffset = Vec2(cos(rotateRadians)*m_oneStep, sin(rotateRadians)*m_oneStep); // 下一步的偏移值
-		// std::cout << vOffset.x << "," << vOffset.y << std::endl;
+																						 // std::cout << vOffset.x << "," << vOffset.y << std::endl;
 		m_sprite->setPosition(vPos + vOffset); // 将精灵移到下一步的位置
 	}
 	else

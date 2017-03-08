@@ -66,7 +66,7 @@ bool HelloWorld::init()
 
 
 	// 地图背景
-	auto pMapSprite = Sprite::create("Background/background.jpg");	
+	auto pMapSprite = Sprite::create("Background/background.jpg");
 	pMapSprite->setAnchorPoint(Vec2(0, 0));
 	this->addChild(pMapSprite);
 
@@ -74,22 +74,27 @@ bool HelloWorld::init()
 	auto pTower = MagicTower(Point(780, 420), this);
 	TowerVec.push_back(pTower);
 
+	// 防御塔基地
+	auto pBasement = BasementBase(Vec2(715, 310), this);
+	BasementVec.push_back(pBasement);
+
+
 	/*
 	auto pBullet = MagicBullet(pEnemy.GetSprite(), pTower.GetSprite()->getPosition(), this);
 	BulletVec.push_back(pBullet);
 	*/
 
 	// 调度器
-	schedule(schedule_selector(HelloWorld::EnemyMove), 2.0f); // 敌军行动
+	schedule(schedule_selector(HelloWorld::EnemyMove), 0.5f); // 敌军行动
 	schedule(schedule_selector(HelloWorld::BulletMove), 0.02f); // 子弹行动
 	schedule(schedule_selector(HelloWorld::TowerAttack), 0.04f); // 防御塔调度器
 
-	/*
-	auto a = EnemyBase(30, Vec2(2, 1), true);
-	std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
-	*/
+																 /*
+																 auto a = EnemyBase(30, Vec2(2, 1), true);
+																 std::cout << a.GetHealth() << ",(" << a.GetVelocity().x << "," << a.GetVelocity().y << "), " << a.GetIsMoving() << std::endl;
+																 */
 
-	// 测试文本，用来判断当前点击的位置
+																 // 测试文本，用来判断当前点击的位置
 	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
 	label->setPosition(Vec2(50, visibleSize.height - 50));
 	label->setAnchorPoint(Vec2::ZERO);
@@ -150,7 +155,7 @@ void HelloWorld::TowerAttack(float dt)
 		{
 			auto pTargetSpt = it->GetTargetSpt();
 			bool IsExistEnemy = false;
-			if (pTargetSpt != NULL && it->IsInRange(pTargetSpt) ) // 目标精灵存在且在射程范围内
+			if (pTargetSpt != NULL && it->IsInRange(pTargetSpt)) // 目标精灵存在且在射程范围内
 			{
 				auto pBullet = MagicBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
 				BulletVec.push_back(pBullet);
@@ -194,6 +199,62 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 	auto vCurPos = touch->getLocation();
 	string str = VecToStr(vCurPos);
 	std::cout << str << std::endl;
+
+	// 判断是否点击基地
+	auto it = BasementVec.begin();
+	while (it != BasementVec.end()) // 遍历所有
+	{
+		auto pSpt = it->GetSprite();
+		auto vPos = pSpt->getPosition();
+		bool bInside = actionManager->IsInside(vPos, vCurPos, BASEMENT_RANGE);
+		if (bInside)
+		{
+			std::cout << "inside!" << std::endl;
+			actionManager->ShowChosenItem(vPos, this);
+			pLastBasement = it;
+			return true;
+		}
+		else
+		{
+			std::cout << "not inside" << std::endl;
+		}	
+		it++;
+	}
+
+	// 判断是否点击建造
+	auto nTag = actionManager->IsClickIcon(vCurPos, this);
+	std::cout << nTag << std::endl;
+	if (nTag == ARROW_ICON_TAG) // 点击弓箭塔图标
+	{
+		std::cout << "build arrow tower\n";
+		auto pLastBasementSpt = pLastBasement->GetSprite();
+		auto vLastBasementPos = pLastBasementSpt->getPosition();
+		actionManager->CreateArrowTower(vLastBasementPos, this);
+		// 清除基地
+		pLastBasementSpt->removeFromParentAndCleanup(true);
+		pLastBasement = BasementVec.erase(pLastBasement);
+	}
+	else if (nTag == CANNON_ICON_TAG) // 点击加农炮塔图标
+	{
+		std::cout << "build connon tower\n";
+		auto pLastBasementSpt = pLastBasement->GetSprite();
+		auto vLastBasementPos = pLastBasementSpt->getPosition();
+		actionManager->CreateCannonTower(vLastBasementPos, this);
+		// 清除基地
+		pLastBasementSpt->removeFromParentAndCleanup(true);
+		pLastBasement = BasementVec.erase(pLastBasement);
+	}
+	else if (nTag == MAGIC_ICON_TAG) // 点击魔法塔图标
+	{
+		std::cout << "build magic tower\n";
+		auto pLastBasementSpt = pLastBasement->GetSprite();
+		auto vLastBasementPos = pLastBasementSpt->getPosition();
+		actionManager->CreateMagicTower(vLastBasementPos, this);
+		// 清除基地
+		pLastBasementSpt->removeFromParentAndCleanup(true);
+		pLastBasement = BasementVec.erase(pLastBasement);
+
+	}
 	return true;
 }
 

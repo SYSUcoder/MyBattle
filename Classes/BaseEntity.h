@@ -16,19 +16,19 @@ USING_NS_CC;
 // 向量坐标
 struct MyVec
 {
-	int m_x;
-	int m_y;
-	MyVec(int x = 0, int y = 0)
-	{
-		m_x = x;
-		m_y = y;
-	}
+int m_x;
+int m_y;
+MyVec(int x = 0, int y = 0)
+{
+m_x = x;
+m_y = y;
+}
 };
 
 // 打印向量坐标
 void PrintMyVec(MyVec myVec)
 {
-	std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
+std::cout << "(" << myVec.m_x << ", " << myVec.m_y << ")\n";
 }
 */
 
@@ -173,6 +173,26 @@ private:
 	double m_MaxCDTime; // 防御塔总冷却时间
 };
 
+// 防御塔基地的基类
+class BasementBase
+{
+public:
+	// @para: 防御塔基地的位置，层节点指针
+	BasementBase(Vec2 vPos, Node* pLayer)
+	{
+		auto pBasement = Sprite::create("Tower/Basement.png");
+		pBasement->setPosition(vPos);
+		pBasement->setScale(0.7, 0.7);
+		pLayer->addChild(pBasement);
+		m_sprite = pBasement;
+	}
+
+	Node* GetSprite() { return m_sprite; }
+	void SetSprite(Node* sprite) { m_sprite = sprite; }
+private:
+	Node* m_sprite; // 精灵
+};
+
 /*****************************************
 * 基类结束
 *****************************************/
@@ -248,7 +268,7 @@ public:
 		Vec2 vVector = targetSpt->getPosition() - vPos; // 精灵指向目的地的向量
 		auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
 		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // 将弧度转为角度
-		pBulletSpt-> setRotation(rotateDegrees);
+		pBulletSpt->setRotation(rotateDegrees);
 
 		SetSprite(pBulletSpt);
 
@@ -286,6 +306,46 @@ public:
 		SetRange(300); // 设置射程
 	}
 	~MagicTower() {}
+
+};
+
+// 弓箭塔
+class ArrowTower : public TowerBase
+{
+public:
+	ArrowTower(Vec2 vPos, Node* pLayer, int Z = 0, int cost = 0, int range = 0)\
+		: TowerBase(cost, range)
+	{
+		auto pArrowTowerSpt = Sprite::create("Tower/ArrowTower.png");
+		pArrowTowerSpt->setPosition(vPos);
+		pArrowTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pLayer->addChild(pArrowTowerSpt, Z);
+		SetSprite(pArrowTowerSpt);
+
+		SetMaxCDTime(ARROW_TOWER_CDTIME);
+		SetRange(300); // 设置射程
+	}
+	~ArrowTower() {}
+
+};
+
+// 加农炮塔
+class CannonTower : public TowerBase
+{
+public:
+	CannonTower(Vec2 vPos, Node* pLayer, int Z = 0, int cost = 0, int range = 0)\
+		: TowerBase(cost, range)
+	{
+		auto pCannonTowerSpt = Sprite::create("Tower/CannonTower.png");
+		pCannonTowerSpt->setPosition(vPos);
+		pCannonTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pLayer->addChild(pCannonTowerSpt, Z);
+		SetSprite(pCannonTowerSpt);
+
+		SetMaxCDTime(CANNON_TOWER_CDTIME);
+		SetRange(300); // 设置射程
+	}
+	~CannonTower() {}
 
 };
 
