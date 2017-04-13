@@ -84,6 +84,10 @@ void EnemyBase::SetSptBitmask(Node* pEnemySpt)
 // 旋转，使精灵面向前进方向
 void BulletBase::Rotate(Vec2 destPos)
 {
+	if (m_sprite == NULL)
+	{
+		return;
+	}
 	Vec2 vPos = m_sprite->getPosition(); // 精灵当前坐标
 	Vec2 vVector = destPos - vPos; // 精灵指向目的地的向量
 	auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
@@ -134,7 +138,7 @@ void BulletBase::MoveOneStep()
 void BulletBase::SetSptBitmask(Node* pBulletSpt)
 {
 	auto tag = pBulletSpt->getTag();
-	if (tag == MAGICBULLET_TAG) // 魔法子弹的掩码
+	if (tag == MAGICBULLET_TAG || tag == ARROWBULLET_TAG || tag == CANNONBULLET_TAG) // 魔法子弹的掩码
 	{
 		pBulletSpt->getPhysicsBody()->setCategoryBitmask(0x02);
 		pBulletSpt->getPhysicsBody()->setContactTestBitmask(0x01);

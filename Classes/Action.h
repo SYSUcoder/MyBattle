@@ -28,7 +28,7 @@ public:
 	void ShowChosenItem(Vec2 vPos, Node* pLayer); // 展示建造防御塔的图标
 	int IsClickIcon(Vec2 vPos, Node* pLayer); // 判断是否点击图标
 
-	EnemyBase CreateEnemy(Node* pLayer);
+	EnemyBase CreateEnemy(Node* pLayer, int health = 100, Vec2 vPos = Vec2(-10, 255));
 	TowerBase CreateArrowTower(Vec2 vPos, Node* pLayer);
 	TowerBase CreateCannonTower(Vec2 vPos, Node* pLayer);
 	TowerBase CreateMagicTower(Vec2 vPos, Node* pLayer);

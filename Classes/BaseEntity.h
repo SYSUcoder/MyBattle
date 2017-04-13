@@ -88,7 +88,7 @@ class BulletBase
 {
 public:
 	// @para: 目标精灵指针，伤害值，速度矢量
-	BulletBase(Node* targetSpt = NULL, int damage = 1, Vec2 velocity = Vec2(0, 0))
+	BulletBase(Node* targetSpt = NULL, int damage = 50, Vec2 velocity = Vec2(0, 0))
 	{
 		m_targetSpt = targetSpt;
 		m_damage = damage;
@@ -138,6 +138,7 @@ public:
 	{
 		m_cost = cost;
 		m_range = range;
+		m_bulletDamage = 50;
 		m_sprite = NULL;
 		m_targetSpt = NULL;
 		m_CDTime = 0.0;
@@ -149,6 +150,9 @@ public:
 
 	int GetRange() { return m_range; }
 	void SetRange(int range) { m_range = range; }
+
+	int GetBulletDamage() { return m_bulletDamage; }
+	void SetBulletDamage(int bulletDamage) { m_bulletDamage = bulletDamage; }
 
 	Node* GetSprite() { return m_sprite; }
 	void SetSprite(Node* sprite) { m_sprite = sprite; }
@@ -167,6 +171,7 @@ public:
 private:
 	int m_cost; // 防御塔造价
 	int m_range; // 射程半径
+	int m_bulletDamage; // 防御塔导弹的伤害值
 	Node* m_sprite; // 精灵
 	Node* m_targetSpt; // 射向目标精灵的指针
 	double m_CDTime; // 防御塔当前冷却时间
@@ -209,7 +214,7 @@ class ArmourEnemy : public EnemyBase
 public:
 	ArmourEnemy(Vec2 vPos, Node* pLayer, int Z = 0, int health = 100, Vec2 velocity = Vec2(0, 0), bool isMoving = false)\
 		: EnemyBase(health, velocity, isMoving)
-	{
+	{ 
 		auto pEnemySpt = Sprite::create("Enemy/ArmourEnemy.png");
 		pEnemySpt->setPosition(vPos);
 		pEnemySpt->setAnchorPoint(Vec2(0.5, 0.5));
@@ -279,6 +284,79 @@ public:
 
 };
 
+// 弓箭导弹
+class ArrowBullet : public BulletBase
+{
+public:
+	ArrowBullet(Node* targetSpt = NULL, Vec2 vPos = Vec2(0, 0), Node* pLayer = NULL, int Z = 0, int damage = 1, Vec2 velocity = Vec2(0, 0))\
+		: BulletBase(targetSpt, damage, velocity)
+	{
+		auto pBulletSpt = Sprite::create("Bullet/ArrowBullet.png");
+		pBulletSpt->setPosition(vPos);
+		pBulletSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pBulletSpt->setTag(ARROWBULLET_TAG);
+		pLayer->addChild(pBulletSpt, Z);
+
+		// 添加刚体
+		auto pBulletBody = PhysicsBody::createBox(Size(pBulletSpt->getContentSize().width, pBulletSpt->getContentSize().height));
+		pBulletBody->setDynamic(false);
+		pBulletSpt->setPhysicsBody(pBulletBody);
+
+		// 设置掩码
+		SetSptBitmask(pBulletSpt);
+
+		// 获取初始方向
+		Vec2 vVector = targetSpt->getPosition() - vPos; // 精灵指向目的地的向量
+		auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
+		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // 将弧度转为角度
+		pBulletSpt->setRotation(rotateDegrees);
+
+		SetSprite(pBulletSpt);
+
+		// 设置移动速度
+		SetOneStep(15);
+	}
+	~ArrowBullet() {}
+
+};
+
+
+// 加农炮导弹
+class CannonBullet : public BulletBase
+{
+public:
+	CannonBullet(Node* targetSpt = NULL, Vec2 vPos = Vec2(0, 0), Node* pLayer = NULL, int Z = 0, int damage = 1, Vec2 velocity = Vec2(0, 0))\
+		: BulletBase(targetSpt, damage, velocity)
+	{
+		auto pBulletSpt = Sprite::create("Bullet/CannonBullet.png");
+		pBulletSpt->setPosition(vPos);
+		pBulletSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pBulletSpt->setTag(CANNONBULLET_TAG);
+		pLayer->addChild(pBulletSpt, Z);
+
+		// 添加刚体
+		auto pBulletBody = PhysicsBody::createBox(Size(pBulletSpt->getContentSize().width, pBulletSpt->getContentSize().height));
+		pBulletBody->setDynamic(false);
+		pBulletSpt->setPhysicsBody(pBulletBody);
+
+		// 设置掩码
+		SetSptBitmask(pBulletSpt);
+
+		// 获取初始方向
+		Vec2 vVector = targetSpt->getPosition() - vPos; // 精灵指向目的地的向量
+		auto rotateRadians = vVector.getAngle(); // 获取向量与x轴的弧度
+		auto rotateDegrees = CC_RADIANS_TO_DEGREES(-1 * rotateRadians); // 将弧度转为角度
+		pBulletSpt->setRotation(rotateDegrees);
+
+		SetSprite(pBulletSpt);
+
+		// 设置移动速度
+		SetOneStep(5);
+	}
+	~CannonBullet() {}
+
+};
+
 /*****************************************
 * 子弹派生类结束
 *****************************************/
@@ -299,11 +377,13 @@ public:
 		auto pMagicTowerSpt = Sprite::create("Tower/MagicTower.png");
 		pMagicTowerSpt->setPosition(vPos);
 		pMagicTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pMagicTowerSpt->setTag(MAGICTOWER_TAG);
 		pLayer->addChild(pMagicTowerSpt, Z);
 		SetSprite(pMagicTowerSpt);
 
 		SetMaxCDTime(MAGIC_TOWER_CDTIME);
 		SetRange(300); // 设置射程
+		SetBulletDamage(MAGIC_DAMAGE_LEVEL1); // 设置导弹伤害值
 	}
 	~MagicTower() {}
 
@@ -319,11 +399,13 @@ public:
 		auto pArrowTowerSpt = Sprite::create("Tower/ArrowTower.png");
 		pArrowTowerSpt->setPosition(vPos);
 		pArrowTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pArrowTowerSpt->setTag(ARROWTOWER_TAG);
 		pLayer->addChild(pArrowTowerSpt, Z);
 		SetSprite(pArrowTowerSpt);
 
 		SetMaxCDTime(ARROW_TOWER_CDTIME);
 		SetRange(300); // 设置射程
+		SetBulletDamage(ARROW_DAMAGE_LEVEL1); // 设置导弹伤害值
 	}
 	~ArrowTower() {}
 
@@ -339,18 +421,21 @@ public:
 		auto pCannonTowerSpt = Sprite::create("Tower/CannonTower.png");
 		pCannonTowerSpt->setPosition(vPos);
 		pCannonTowerSpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pCannonTowerSpt->setTag(CANNONTOWER_TAG); 
 		pLayer->addChild(pCannonTowerSpt, Z);
 		SetSprite(pCannonTowerSpt);
 
 		SetMaxCDTime(CANNON_TOWER_CDTIME);
 		SetRange(300); // 设置射程
+		SetBulletDamage(CANNON_DAMAGE_LEVEL1); // 设置导弹伤害值
 	}
 	~CannonTower() {}
 
 };
 
 
-/*****************************************
+/****************************************
+*
 * 防御塔派生类结束
 *****************************************/
 

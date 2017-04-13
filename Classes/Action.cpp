@@ -50,9 +50,10 @@ bool MyActionManager::IsInside(Vec2 vPos1, Vec2 vPos2, double fDistance)
 }
 
 
-EnemyBase MyActionManager::CreateEnemy(Node* pLayer)
+EnemyBase MyActionManager::CreateEnemy(Node* pLayer, int health, Vec2 vPos)
 {
-	auto pEnemy = ArmourEnemy(Point(-10, 255), pLayer);
+	auto pEnemy = ArmourEnemy(vPos, pLayer);
+	pEnemy.SetHealth(health);
 	return pEnemy;
 }
 

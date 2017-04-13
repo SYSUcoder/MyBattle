@@ -70,12 +70,13 @@ bool HelloWorld::init()
 	pMapSprite->setAnchorPoint(Vec2(0, 0));
 	this->addChild(pMapSprite);
 
-	// 防御塔
-	auto pTower = MagicTower(Point(780, 420), this);
-	TowerVec.push_back(pTower);
 
 	// 防御塔基地
 	auto pBasement = BasementBase(Vec2(715, 310), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(780, 420), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(400, 720), this);
 	BasementVec.push_back(pBasement);
 
 
@@ -127,7 +128,7 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 // 敌军行动
 void HelloWorld::EnemyMove(float dt)
 {
-	auto pEnemy = actionManager->CreateEnemy(this);
+	auto pEnemy = actionManager->CreateEnemy(this, 300);
 	EnemyVec.push_back(pEnemy);
 	actionManager->MoveToDestination(pEnemy, RIGHT_TOP_DESTINATION);
 }
@@ -151,13 +152,31 @@ void HelloWorld::TowerAttack(float dt)
 	{
 		double MaxCDTime = it->GetMaxCDTime();
 		double curCDTime = it->GetCDTime();
-		if (curCDTime <= 0.000001) // 处于可发射状态
+		if (curCDTime <= 0) // 处于可发射状态
 		{
 			auto pTargetSpt = it->GetTargetSpt();
 			bool IsExistEnemy = false;
 			if (pTargetSpt != NULL && it->IsInRange(pTargetSpt)) // 目标精灵存在且在射程范围内
 			{
-				auto pBullet = MagicBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
+				BulletBase pBullet;
+				if (it->GetSprite()->getTag() == MAGICTOWER_TAG) // 魔法塔射出魔法子弹
+				{
+					pBullet = MagicBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
+				}
+				else if (it->GetSprite()->getTag() == ARROWTOWER_TAG) // 箭塔射出弓箭
+				{
+					pBullet = ArrowBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
+				}
+				else if (it->GetSprite()->getTag() == CANNONTOWER_TAG) // 加农炮塔射出加农炮
+				{
+					pBullet = CannonBullet(pTargetSpt, it->GetSprite()->getPosition(), this);
+				}
+				else
+				{
+					std::cout << "something wrong\n";
+					break;
+				}
+				pBullet.SetDamage(it->GetBulletDamage());
 				BulletVec.push_back(pBullet);
 				IsExistEnemy = true;
 			}
@@ -169,7 +188,25 @@ void HelloWorld::TowerAttack(float dt)
 					auto pEnemySpt = pEnemyIt->GetSprite();
 					if (it->IsInRange(pEnemySpt)) // 找到第一个在射程范围之内的目标
 					{
-						auto pBullet = MagicBullet(pEnemySpt, it->GetSprite()->getPosition(), this);
+						BulletBase pBullet;
+						if (it->GetSprite()->getTag() == MAGICTOWER_TAG) // 魔法塔射出魔法子弹
+						{
+							pBullet = MagicBullet(pEnemySpt, it->GetSprite()->getPosition(), this);
+						}
+						else if (it->GetSprite()->getTag() == ARROWTOWER_TAG) // 箭塔射出弓箭
+						{
+							pBullet = ArrowBullet(pEnemySpt, it->GetSprite()->getPosition(), this);
+						}
+						else if (it->GetSprite()->getTag() == CANNONTOWER_TAG) // 加农炮塔射出加农炮
+						{
+							pBullet = CannonBullet(pEnemySpt, it->GetSprite()->getPosition(), this);
+						}
+						else
+						{
+							std::cout << "something wrong\n";
+							break;
+						}
+						pBullet.SetDamage(it->GetBulletDamage());
 						BulletVec.push_back(pBullet);
 						it->SetTargetSpt(pEnemySpt);
 						IsExistEnemy = true;
@@ -229,7 +266,8 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 		std::cout << "build arrow tower\n";
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
-		actionManager->CreateArrowTower(vLastBasementPos, this);
+		auto pTower = actionManager->CreateArrowTower(vLastBasementPos, this);
+		TowerVec.push_back(pTower);
 		// 清除基地
 		pLastBasementSpt->removeFromParentAndCleanup(true);
 		pLastBasement = BasementVec.erase(pLastBasement);
@@ -239,7 +277,8 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 		std::cout << "build connon tower\n";
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
-		actionManager->CreateCannonTower(vLastBasementPos, this);
+		auto pTower = actionManager->CreateCannonTower(vLastBasementPos, this);
+		TowerVec.push_back(pTower);
 		// 清除基地
 		pLastBasementSpt->removeFromParentAndCleanup(true);
 		pLastBasement = BasementVec.erase(pLastBasement);
@@ -249,10 +288,11 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 		std::cout << "build magic tower\n";
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
-		actionManager->CreateMagicTower(vLastBasementPos, this);
+		auto pTower = actionManager->CreateMagicTower(vLastBasementPos, this);
 		// 清除基地
 		pLastBasementSpt->removeFromParentAndCleanup(true);
 		pLastBasement = BasementVec.erase(pLastBasement);
+		TowerVec.push_back(pTower);
 
 	}
 	return true;
@@ -278,41 +318,92 @@ bool HelloWorld::onContactBegin(PhysicsContact& contact)
 
 	if (nodeA && nodeB)
 	{
-		auto pTowerIt = TowerVec.begin();
-		while (pTowerIt != TowerVec.end()) // 清除防御塔的目标精灵
+		Node *pBullet, *pTarget;
+
+		// 判断NodeA和NodeB的类型
+		if (nodeA->getTag() < ENEMY_TAG)
 		{
-			auto targetSpt = pTowerIt->GetTargetSpt();
-			if (targetSpt == nodeA || targetSpt == nodeB)
-			{
-				pTowerIt->SetTargetSpt(NULL);
-			}
-			pTowerIt++;
+			pTarget = nodeA;
+			pBullet = nodeB;
 		}
-		auto pBulletIt = BulletVec.begin();
-		while (pBulletIt != BulletVec.end()) // 清除子弹的目标精灵
+		else
 		{
-			auto targetSpt = pBulletIt->GetSprite();
-			if (targetSpt == nodeA || targetSpt == nodeB)
+			pBullet = nodeA;
+			pTarget = nodeB;
+		}
+
+		int BulletDamage; // 导弹造成伤害值
+		auto pBulletIt = BulletVec.begin();
+		while (pBulletIt != BulletVec.end())
+		{
+			auto pBulletSpt = pBulletIt->GetSprite();
+			if (pBulletSpt == pBullet)
 			{
-				pBulletIt->SetTargetSpt(NULL);
-				pBulletIt = BulletVec.erase(pBulletIt);
+				std::cout << "delete!\n";
+				BulletDamage = pBulletIt->GetDamage(); // 获取伤害值
+				pBulletIt = BulletVec.erase(pBulletIt); // 移除导弹
+				break;
 			}
 			else
 				pBulletIt++;
 		}
+
 		auto pEnemyIt = EnemyVec.begin();
-		while (pEnemyIt != EnemyVec.end()) // 清除敌人的目标精灵
+		while (pEnemyIt != EnemyVec.end())
 		{
-			auto targetSpt = pEnemyIt->GetSprite();
-			if (targetSpt == nodeA || targetSpt == nodeB)
+			auto pEnemySpt = pEnemyIt->GetSprite();
+			if (pEnemySpt == pTarget) // 获取目标精灵
 			{
-				pEnemyIt = EnemyVec.erase(pEnemyIt);
+				int finalHealth = pEnemyIt->GetHealth() - BulletDamage;
+				if (finalHealth <= 0) // 血量降为0以下
+				{
+					auto pTowerIt = TowerVec.begin();
+					while (pTowerIt != TowerVec.end()) // 清除防御塔的目标精灵
+					{
+						auto targetSpt = pTowerIt->GetTargetSpt();
+						if (targetSpt == pTarget)
+						{
+							pTowerIt->SetTargetSpt(NULL);
+						}
+						pTowerIt++;
+					}
+
+					auto pBulletIt = BulletVec.begin();
+					while (pBulletIt != BulletVec.end()) // 清除子弹的目标精灵
+					{
+						auto targetSpt = pBulletIt->GetTargetSpt();
+						auto pBulletSpt = pBulletIt->GetSprite();
+						if (targetSpt == pTarget)
+						{
+							pBulletIt->SetTargetSpt(NULL);
+						}
+						pBulletIt++;
+					}
+
+					auto pEnemyIt = EnemyVec.begin();
+					while (pEnemyIt != EnemyVec.end()) // 清除敌人的目标精灵
+					{
+						auto targetSpt = pEnemyIt->GetSprite();
+						if (targetSpt == pTarget)
+						{
+							pEnemyIt = EnemyVec.erase(pEnemyIt);
+						}
+						else
+							pEnemyIt++;
+					}
+
+					pTarget->removeFromParentAndCleanup(true); // 移除敌人的精灵
+				}
+				else
+				{
+					pEnemyIt->SetHealth(finalHealth);
+				}
+				break;
 			}
-			else
-				pEnemyIt++;
+			pEnemyIt++;
 		}
-		nodeA->removeFromParentAndCleanup(true);
-		nodeB->removeFromParentAndCleanup(true);
+
+		pBullet->removeFromParentAndCleanup(true);
 	}
 
 	return true;
