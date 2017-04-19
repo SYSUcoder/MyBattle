@@ -23,10 +23,28 @@ void MyActionManager::MoveToDestination(EnemyBase pEnemy, Vec2 destPos)
 		auto moveToPos6 = MoveTo::create(sqrt(200 * 200 + 80 * 80) / oneStep * VELOCITY_RATE, Vec2(900, 280));
 		auto moveToPos7 = MoveTo::create(200 * 1.0 / oneStep * VELOCITY_RATE, Vec2(900, 480));
 		auto moveToPos8 = MoveTo::create(sqrt(100 * 100 + 40 * 40) / oneStep * VELOCITY_RATE, Vec2(1000, 520));
-		auto moveToPos9 = MoveTo::create(300 * 1.0 / oneStep * VELOCITY_RATE, Vec2(1300, 520));
+		auto moveToPos9 = MoveTo::create(350 * 1.0 / oneStep * VELOCITY_RATE, Vec2(1350, 520));
 		auto action = Sequence::create(moveToPos1, moveToPos2, moveToPos3, moveToPos4,
 			moveToPos5, moveToPos6, moveToPos7, moveToPos8,
 			moveToPos9, NULL);
+		pEnemySpt->runAction(action);
+	}
+	else if (destPos == LEFT_TOP_DESTINATION)
+	{
+		auto moveToPos1 = MoveTo::create((pEnemySpt->getPosition().x - 1050)*1.0 / oneStep * VELOCITY_RATE, Vec2(1050, 200));
+		auto moveToPos2 = MoveTo::create(sqrt(150 * 150 + 85 * 85) / oneStep * VELOCITY_RATE, Vec2(900, 285));
+		auto moveToPos3 = MoveTo::create(185 * 1.0 / oneStep * VELOCITY_RATE, Vec2(900, 470));
+		auto moveToPos4 = MoveTo::create(sqrt(150 * 150 + 60 * 60) / oneStep * VELOCITY_RATE, Vec2(750, 530));
+		auto moveToPos5 = MoveTo::create(170 * 1.0 / oneStep * VELOCITY_RATE, Vec2(580, 530));
+		auto moveToPos6 = MoveTo::create(sqrt(150 * 150 + 80 * 80) / oneStep * VELOCITY_RATE, Vec2(430, 450));
+		auto moveToPos7 = MoveTo::create(120 * 1.0 / oneStep * VELOCITY_RATE, Vec2(310, 450));
+		auto moveToPos8 = MoveTo::create(sqrt(70 * 70 + 60 * 60) / oneStep * VELOCITY_RATE, Vec2(240, 510));
+		auto moveToPos9 = MoveTo::create(120 * 1.0 / oneStep * VELOCITY_RATE, Vec2(120, 510));
+		auto moveToPos10 = MoveTo::create(sqrt(60 * 60 + 30 * 30) / oneStep * VELOCITY_RATE, Vec2(60, 480));
+		auto moveToPos11 = MoveTo::create(160 * 1.0 / oneStep * VELOCITY_RATE, Vec2(-100, 480));
+		auto action = Sequence::create(moveToPos1, moveToPos2, moveToPos3, moveToPos4,
+			moveToPos5, moveToPos6, moveToPos7, moveToPos8,
+			moveToPos9, moveToPos10, moveToPos11, NULL);
 		pEnemySpt->runAction(action);
 	}
 	else
@@ -50,10 +68,26 @@ bool MyActionManager::IsInside(Vec2 vPos1, Vec2 vPos2, double fDistance)
 }
 
 
-EnemyBase MyActionManager::CreateEnemy(Node* pLayer, int health, Vec2 vPos)
+EnemyBase MyActionManager::CreateEnemy(Node* pLayer, int enemyTag, int enemyDir, int health, Vec2 vPos)
 {
-	auto pEnemy = ArmourEnemy(vPos, pLayer);
-	pEnemy.SetHealth(health);
+	EnemyBase pEnemy;
+	if (enemyTag == ARMOUR_TAG)
+	{
+		pEnemy = ArmourEnemy(vPos, pLayer, enemyDir, 300);
+	}
+	else if (enemyTag == MONSTER_TAG)
+	{
+		pEnemy = MonsterEnemy(vPos, pLayer, enemyDir, 800);
+	}
+	else if (enemyTag == BOSS_TAG)
+	{
+		pEnemy = BossEnemy(vPos, pLayer, enemyDir, 3000);
+	}
+	else
+	{
+		std::cout << "create enemy wrong\n";
+	}
+
 	return pEnemy;
 }
 

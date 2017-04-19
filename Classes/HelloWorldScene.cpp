@@ -18,7 +18,7 @@ Scene* HelloWorld::createScene()
 	auto scene = Scene::createWithPhysics();
 
 	// 调试用，显示红框
-	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	// scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 
 	// 'layer' is an autorelease object
 	auto layer = HelloWorld::create();
@@ -40,6 +40,9 @@ bool HelloWorld::init()
 	}
 
 	actionManager = MyActionManager::getInstance();
+	PlayerMoney = PLAYER_INIT_MONEY;
+	WaveCount = 0;
+	IntervalCount = 0;
 
 
 	//*******************************************************************
@@ -58,10 +61,11 @@ bool HelloWorld::init()
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 
-
+	/*
 	auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
 	label->setPosition(Vec2(origin.x + visibleSize.width / 2,
 		origin.y + visibleSize.height - label->getContentSize().height));
+	*/
 	//*******************************************************************
 
 
@@ -76,7 +80,17 @@ bool HelloWorld::init()
 	BasementVec.push_back(pBasement);
 	pBasement = BasementBase(Vec2(780, 420), this);
 	BasementVec.push_back(pBasement);
-	pBasement = BasementBase(Vec2(400, 720), this);
+	pBasement = BasementBase(Vec2(370, 525), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(315, 205), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(1000, 420), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(875, 575), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(1060, 315), this);
+	BasementVec.push_back(pBasement);
+	pBasement = BasementBase(Vec2(215, 375), this);
 	BasementVec.push_back(pBasement);
 
 
@@ -86,7 +100,7 @@ bool HelloWorld::init()
 	*/
 
 	// 调度器
-	schedule(schedule_selector(HelloWorld::EnemyMove), 0.5f); // 敌军行动
+	schedule(schedule_selector(HelloWorld::EnemyMove), 0.2f); // 敌军行动
 	schedule(schedule_selector(HelloWorld::BulletMove), 0.02f); // 子弹行动
 	schedule(schedule_selector(HelloWorld::TowerAttack), 0.04f); // 防御塔调度器
 
@@ -96,11 +110,11 @@ bool HelloWorld::init()
 																 */
 
 																 // 测试文本，用来判断当前点击的位置
-	label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
-	label->setPosition(Vec2(50, visibleSize.height - 50));
-	label->setAnchorPoint(Vec2::ZERO);
-	label->setString("hello");
-	addChild(label, 1);
+	MoneyLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40);
+	MoneyLabel->setPosition(Vec2(50, visibleSize.height - 50));
+	MoneyLabel->setAnchorPoint(Vec2::ZERO);
+	RefreshMoney();
+	addChild(MoneyLabel, 1);
 
 	// 碰撞监听
 	auto listener = EventListenerPhysicsContact::create();
@@ -115,6 +129,14 @@ bool HelloWorld::init()
 	return true;
 }
 
+void HelloWorld::RefreshMoney()
+{
+	stringstream ss;
+	ss << PlayerMoney;
+	string MoneyCount = ss.str();
+	MoneyCount = "Gold: " + MoneyCount;
+	MoneyLabel->setString(MoneyCount);
+}
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -128,9 +150,26 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 // 敌军行动
 void HelloWorld::EnemyMove(float dt)
 {
-	auto pEnemy = actionManager->CreateEnemy(this, 300);
-	EnemyVec.push_back(pEnemy);
-	actionManager->MoveToDestination(pEnemy, RIGHT_TOP_DESTINATION);
+	if (IntervalCount > 0)
+	{
+		IntervalCount -= 1;
+		return;
+	}
+	else
+	{
+		SeqNode seqNode = NodeVec[WaveCount];
+		WaveCount = (WaveCount + 1) % WAVECOUNT;
+		IntervalCount = seqNode.TimeInterval;
+		auto pEnemy = actionManager->CreateEnemy(this, seqNode.EnemyTag, RIGHT_TOP_DIR);
+		if (seqNode.EnemyTag == ARMOUR_TAG)
+			pEnemy.SetValue(ARMOUR_VALUE);
+		else if (seqNode.EnemyTag == MONSTER_TAG)
+			pEnemy.SetValue(MONSTER_VALUE);
+		else if (seqNode.EnemyTag == BOSS_TAG)
+			pEnemy.SetValue(BOSS_VALUE);
+		EnemyVec.push_back(pEnemy);
+		actionManager->MoveToDestination(pEnemy, RIGHT_TOP_DESTINATION);
+	}
 }
 
 // 子弹行动
@@ -246,14 +285,14 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 		bool bInside = actionManager->IsInside(vPos, vCurPos, BASEMENT_RANGE);
 		if (bInside)
 		{
-			std::cout << "inside!" << std::endl;
+			// std::cout << "inside!" << std::endl;
 			actionManager->ShowChosenItem(vPos, this);
 			pLastBasement = it;
 			return true;
 		}
 		else
 		{
-			std::cout << "not inside" << std::endl;
+			// std::cout << "not inside" << std::endl;
 		}	
 		it++;
 	}
@@ -263,7 +302,13 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 	std::cout << nTag << std::endl;
 	if (nTag == ARROW_ICON_TAG) // 点击弓箭塔图标
 	{
+		if (PlayerMoney < ARROWTOWER_COST) // 金币不够
+		{
+			return false;
+		}
 		std::cout << "build arrow tower\n";
+		PlayerMoney -= ARROWTOWER_COST;
+		RefreshMoney();
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
 		auto pTower = actionManager->CreateArrowTower(vLastBasementPos, this);
@@ -274,7 +319,13 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 	}
 	else if (nTag == CANNON_ICON_TAG) // 点击加农炮塔图标
 	{
+		if (PlayerMoney < CANNONTOWER_COST) // 金币不够
+		{
+			return false;
+		}
 		std::cout << "build connon tower\n";
+		PlayerMoney -= CANNONTOWER_COST;
+		RefreshMoney();
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
 		auto pTower = actionManager->CreateCannonTower(vLastBasementPos, this);
@@ -285,15 +336,20 @@ bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 	}
 	else if (nTag == MAGIC_ICON_TAG) // 点击魔法塔图标
 	{
+		if (PlayerMoney < MAGICTOWER_COST) // 金币不够
+		{
+			return false;
+		}
 		std::cout << "build magic tower\n";
+		PlayerMoney -= MAGICTOWER_COST;
+		RefreshMoney();
 		auto pLastBasementSpt = pLastBasement->GetSprite();
 		auto vLastBasementPos = pLastBasementSpt->getPosition();
 		auto pTower = actionManager->CreateMagicTower(vLastBasementPos, this);
+		TowerVec.push_back(pTower);
 		// 清除基地
 		pLastBasementSpt->removeFromParentAndCleanup(true);
 		pLastBasement = BasementVec.erase(pLastBasement);
-		TowerVec.push_back(pTower);
-
 	}
 	return true;
 }
@@ -357,6 +413,11 @@ bool HelloWorld::onContactBegin(PhysicsContact& contact)
 				int finalHealth = pEnemyIt->GetHealth() - BulletDamage;
 				if (finalHealth <= 0) // 血量降为0以下
 				{
+					std::cout << "enemy die\n";
+					std::cout << "enemy health: " << pEnemyIt->GetHealth() << ", bullet damage: " << BulletDamage << std::endl;
+					PlayerMoney += pEnemyIt->GetValue(); // 击杀敌军获取金币
+					RefreshMoney();
+
 					auto pTowerIt = TowerVec.begin();
 					while (pTowerIt != TowerVec.end()) // 清除防御塔的目标精灵
 					{

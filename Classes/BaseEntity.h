@@ -43,7 +43,8 @@ class EnemyBase
 {
 public:
 	// @para: 生命值，速度矢量，移动状态
-	EnemyBase(int health = 100, Vec2 velocity = Vec2(0, 0), bool isMoving = false)
+	// EnemyBase()	{}
+	EnemyBase(int health = 300, Vec2 velocity = Vec2(0, 0), bool isMoving = false)
 	{
 		m_health = health;
 		m_velocity = velocity;
@@ -68,6 +69,9 @@ public:
 	int GetOneStep() { return m_oneStep; }
 	void SetOneStep(int oneStep) { m_oneStep = oneStep; }
 
+	int GetValue() { return m_value; }
+	void SetValue(int value) { m_value = value; }
+
 	void Rotate(Vec2 destPos); // 敌人旋转至面向目的地
 	bool MoveOneStep(Vec2 destPos); // 敌人朝向目的地移动一步
 	bool IsReach(Vec2 destPos); // 判断是否达到目的地
@@ -79,6 +83,7 @@ private:
 	bool m_isMoving; // 是否在移动
 	Node* m_sprite; // 精灵
 	int m_oneStep; // 精灵一步最大所占的像素
+	int m_value; // 击杀该单位可获得的金币
 };
 
 
@@ -212,10 +217,14 @@ private:
 class ArmourEnemy : public EnemyBase
 {
 public:
-	ArmourEnemy(Vec2 vPos, Node* pLayer, int Z = 0, int health = 100, Vec2 velocity = Vec2(0, 0), bool isMoving = false)\
+	ArmourEnemy(Vec2 vPos, Node* pLayer, int enemyDir = RIGHT_TOP_DIR, int health = 300, int Z = 0, Vec2 velocity = Vec2(0, 0), bool isMoving = false)\
 		: EnemyBase(health, velocity, isMoving)
 	{ 
-		auto pEnemySpt = Sprite::create("Enemy/ArmourEnemy.png");
+		Node* pEnemySpt;
+		if (enemyDir == RIGHT_TOP_DIR)
+			pEnemySpt = Sprite::create("Enemy/ArmourEnemy.png");
+		else
+			pEnemySpt = Sprite::create("Enemy/ArmourEnemy_Left.png");
 		pEnemySpt->setPosition(vPos);
 		pEnemySpt->setAnchorPoint(Vec2(0.5, 0.5));
 		pEnemySpt->setTag(ARMOUR_TAG);
@@ -231,9 +240,75 @@ public:
 		SetSptBitmask(pEnemySpt);
 
 		// 设置移动速度
-		SetOneStep(5);
+		SetOneStep(3);
 	}
 	~ArmourEnemy() {}
+
+};
+
+// 怪物敌军单位
+class MonsterEnemy : public EnemyBase
+{
+public:
+	MonsterEnemy(Vec2 vPos, Node* pLayer, int enemyDir = RIGHT_TOP_DIR, int health = 800, int Z = 1, Vec2 velocity = Vec2(0, 0), bool isMoving = false)\
+		: EnemyBase(health, velocity, isMoving)
+	{
+		Node* pEnemySpt;
+		if (enemyDir == RIGHT_TOP_DIR)
+			pEnemySpt = Sprite::create("Enemy/MonsterEnemy.png");
+		else
+			pEnemySpt = Sprite::create("Enemy/MonsterEnemy_Left.png");
+		pEnemySpt->setPosition(vPos);
+		pEnemySpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pEnemySpt->setTag(MONSTER_TAG);
+		pLayer->addChild(pEnemySpt, Z);
+		SetSprite(pEnemySpt);
+
+		// 添加刚体
+		auto pEnemyBody = PhysicsBody::createBox(Size(pEnemySpt->getContentSize().width, pEnemySpt->getContentSize().height));
+		pEnemyBody->setDynamic(false);
+		pEnemySpt->setPhysicsBody(pEnemyBody);
+
+		// 设置掩码
+		SetSptBitmask(pEnemySpt);
+
+		// 设置移动速度
+		SetOneStep(2);
+	}
+	~MonsterEnemy() {}
+
+};
+
+// 头目敌军单位
+class BossEnemy : public EnemyBase
+{
+public:
+	BossEnemy(Vec2 vPos, Node* pLayer, int enemyDir = RIGHT_TOP_DIR, int health = 3000, int Z = 2, Vec2 velocity = Vec2(0, 0), bool isMoving = false)\
+		: EnemyBase(health, velocity, isMoving)
+	{
+		Node* pEnemySpt;
+		if (enemyDir == RIGHT_TOP_DIR)
+			pEnemySpt = Sprite::create("Enemy/BossEnemy.png");
+		else
+			pEnemySpt = Sprite::create("Enemy/BossEnemy_Left.png");
+		pEnemySpt->setPosition(vPos);
+		pEnemySpt->setAnchorPoint(Vec2(0.5, 0.5));
+		pEnemySpt->setTag(BOSS_TAG);
+		pLayer->addChild(pEnemySpt, Z);
+		SetSprite(pEnemySpt);
+
+		// 添加刚体
+		auto pEnemyBody = PhysicsBody::createBox(Size(pEnemySpt->getContentSize().width, pEnemySpt->getContentSize().height));
+		pEnemyBody->setDynamic(false);
+		pEnemySpt->setPhysicsBody(pEnemyBody);
+
+		// 设置掩码
+		SetSptBitmask(pEnemySpt);
+
+		// 设置移动速度
+		SetOneStep(3);
+	}
+	~BossEnemy() {}
 
 };
 
@@ -278,7 +353,7 @@ public:
 		SetSprite(pBulletSpt);
 
 		// 设置移动速度
-		SetOneStep(10);
+		SetOneStep(6);
 	}
 	~MagicBullet() {}
 
@@ -314,7 +389,7 @@ public:
 		SetSprite(pBulletSpt);
 
 		// 设置移动速度
-		SetOneStep(15);
+		SetOneStep(8);
 	}
 	~ArrowBullet() {}
 
@@ -351,7 +426,7 @@ public:
 		SetSprite(pBulletSpt);
 
 		// 设置移动速度
-		SetOneStep(5);
+		SetOneStep(3);
 	}
 	~CannonBullet() {}
 

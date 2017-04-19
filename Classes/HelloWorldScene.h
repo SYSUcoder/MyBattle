@@ -32,14 +32,19 @@ public:
 	void BulletMove(float dt); // 子弹行动
 	void TowerAttack(float dt); // 防御塔进攻
 
+	void RefreshMoney(); // 刷新金币数量
+
 private:
 	MyActionManager* actionManager; // 处理相关行为的指针
 	vector<EnemyBase> EnemyVec; // 敌人的集合
 	vector<BulletBase> BulletVec; // 子弹的集合
 	vector<TowerBase> TowerVec; // 防御塔的集合
 	vector<BasementBase> BasementVec; // 防御塔基地的集合
+	int PlayerMoney; // 玩家的金币数量
 	vector<BasementBase>::iterator pLastBasement; // 上一次点击的基地指针
-	Label* label; // 测试文本
+	Label* MoneyLabel; // 测试文本
+	int WaveCount; // 记录波次
+	int IntervalCount; // 间隔计数
 };
 
 #endif // __HELLOWORLD_SCENE_H__

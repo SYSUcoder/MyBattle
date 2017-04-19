@@ -65,7 +65,7 @@ bool EnemyBase::IsReach(Vec2 destPos)
 void EnemyBase::SetSptBitmask(Node* pEnemySpt)
 {
 	auto tag = pEnemySpt->getTag();
-	if (tag == ARMOUR_TAG) // 盔甲兵的掩码
+	if (tag == ARMOUR_TAG || tag == MONSTER_TAG || tag == BOSS_TAG) // 盔甲兵的掩码
 	{
 		pEnemySpt->getPhysicsBody()->setCategoryBitmask(0x01);
 		pEnemySpt->getPhysicsBody()->setContactTestBitmask(0x02);
